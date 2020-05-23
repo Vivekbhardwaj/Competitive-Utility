@@ -21,18 +21,21 @@ int powerModulo(int a, int b) {
 	return res;
 }
 
-int fact[100005],inversefact[100005];
+int fact[1000005],inverseFactorials[1000005];
 void pre() {
 	fact[0]=1;
-	fr(i,1,100000) {
+	for(int i=1;i<1000005;i++) {
 		fact[i]=(fact[i-1]*i)%MOD;
 	}
-	ifact[100000]=powerModulo(fact[100000],MOD-2);
-	for(int i=99999; i>=0; i--)
-		inversefact[i]=(inversefact[i+1]*(i+1))%MOD;
+    for(int i=0;i<1000005;i++){
+        inverseFactorials[i]=powerMODulo(fact[i],MOD-2);
+    }
 }
-inline int ncr(int n, int r) {
-	return (((fact[n]*inversefact[r])%MOD)*inversefact[n-r])%MOD;
+
+
+inline int nCr(int n,int r){
+    if(n<r) return 0;
+    return (((fact[n]*inverseFactorials[r])%MOD)*inverseFactorials[n-r])%MOD;
 }
 
 int main(){
