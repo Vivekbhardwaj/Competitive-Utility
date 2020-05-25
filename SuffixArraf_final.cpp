@@ -24,20 +24,22 @@ vector<int> createSuffixArray(const string &s){
 
     // for(auto i : suffixArray) cerr<<i<<" ";cerr<<"\n";
 
-    for(int i=2;i<=log2(n)+2;i++){
+    for(int k=2,i=1;k<=ceil(1.0*log2(n))+1;i*=2,k++){               //you have to move in blocks of power of 2
         vector<pair<int,int>> tuple_to_be_sorted(n);
         for(int j=0;j<n;j++){
             tuple_to_be_sorted[j].first=suffixArray[j];
-            tuple_to_be_sorted[j].second=(j+i-1<n?suffixArray[j+i-1]:-1);
+            tuple_to_be_sorted[j].second=(j+i<n?suffixArray[j+i]:-1);
         }
 
         //map here is used to find the order of the pair
         map<pair<int,int>,int> m;
         for(auto i : tuple_to_be_sorted) m[i]++;
         counter=0;
-        for(auto &i : m){
-            i.second=counter++;
+        for(auto &j : m){
+            j.second=counter++;
+            // cerr<<"("<<j.first.first<<","<<j.first.second<<") ";
         }
+        // cerr<<"\n";
          
 
         for(int j=0;j<n;j++){
@@ -52,6 +54,7 @@ vector<int> createSuffixArray(const string &s){
     //this is not the suffix array same as what the definition says though it is similar and we can get the suffix array of our definition by single pass
     //this suffix array gives the information that if we sort the suffixes what will be the index of suffix starting at i in our string
     // return suffixArray;
+
 
 
     vector<pair<int,int>> x(n);
@@ -72,7 +75,7 @@ vector<int> createSuffixArray(const string &s){
 }
 
 int main(){
-    vector<int> x = createSuffixArray("aabbaabbaabb");
+    vector<int> x = createSuffixArray("aagsmrvafyqwxq");
     for(auto i : x) cerr<<i<<" ";cerr<<"\n";
 
     return 0;
