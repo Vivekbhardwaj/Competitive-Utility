@@ -9,7 +9,7 @@ using ord_set = tree<T,null_type,less<T>,rb_tree_tag,tree_order_statistics_node_
 #define int long long
 
 
-const int MOD=163577857;
+const int MOD=1e9+7;
 int powerModulo(int a, int b) {
 	int res=1;
 	while(b) {
@@ -38,7 +38,7 @@ inline int nCr(int n,int r){
     return (((fact[n]*inverseFactorials[r])%MOD)*inverseFactorials[n-r])%MOD;
 }
 
-int main(){
+int32_t main(){
     
    return 0;
 }
