@@ -28,7 +28,7 @@ void pre() {
 		fact[i]=(fact[i-1]*i)%MOD;
 	}
     for(int i=0;i<1000005;i++){
-        inverseFactorials[i]=powerMODulo(fact[i],MOD-2);
+        inverseFactorials[i]=powerModulo(fact[i],MOD-2);
     }
 }
 
