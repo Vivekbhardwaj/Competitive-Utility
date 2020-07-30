@@ -1,0 +1,76 @@
+struct query{
+    int l,r,id;
+    query(int l,int r,int id){
+        this->l=l;this->r=r;this->id=id;
+    }
+};
+
+class MO{
+    private : 
+    const int MAXN=100005;
+    int BLOCK_SIZE=1000;            //this works for most questions no need to make BLOCK_SIZE = sqrt(n);
+    vector<query> q;
+    vector<int> v;
+
+
+    vector<int> freq;   /*global data structure that keeps the data of current segment*/
+    int a=0;
+
+    //Change add and erase as per need
+    void add(int x){
+        if(v[x]<MAXN){
+            if(freq[v[x]]==v[x]) a--;
+            freq[v[x]]++;
+            if(freq[v[x]]==v[x]) a++;
+        }
+    }
+    
+    void erase(int x){
+        if(v[x]<MAXN){
+            if(freq[v[x]]==v[x]) a--;
+            freq[v[x]]--;
+            if(freq[v[x]]==v[x]) a++;
+        }
+    }
+
+    public : 
+
+    //keeps the ans of queries
+    vector<int> ans;
+
+    MO(int noOfquery,vector<int> v){
+        this->v=v;
+        ans.resize(noOfquery);
+        freq.assign(MAXN,0);
+    }
+
+    void add_query(query qr){
+        q.push_back(qr);
+    }
+
+    void solve(){
+        sort(q.begin(),q.end(),[&](const auto &a,const auto &b){
+                                return a.l/BLOCK_SIZE==b.l/BLOCK_SIZE?a.r>b.r:a.l/BLOCK_SIZE<b.l/BLOCK_SIZE;
+                                });
+        int ML=0,MR=-1;
+        for(query i : q){
+            while(MR<i.r){
+                ++MR;
+                add(MR);
+            }
+            while(ML<i.l){
+                erase(ML);
+                ML++;
+            }
+            while(ML>i.l){
+                ML--;
+                add(ML);
+            }
+            while(MR>i.r){
+                erase(MR);
+                MR--;
+            }
+            ans[i.id]=a;
+        }
+    }
+};
