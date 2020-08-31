@@ -7,7 +7,7 @@ class Hash{
     vector<vector<int>> reverse_v;
     vector<int> MOD;
     vector<int> BASE;
-    const int MAXN = 4e3;
+    const int MAXN = 5e6;
     vector<vector<int>> powers;
     vector<vector<int>> inversePowers;
 
