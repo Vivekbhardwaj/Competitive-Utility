@@ -1,109 +1,98 @@
-class Hash{
-    private :
-    string s;
-    int sz;
-    int numberOfHashes;
-    vector<vector<int>> v;
-    vector<vector<int>> reverse_v;
-    vector<int> MOD;
-    vector<int> BASE;
-    const int MAXN = 5e6;
-    vector<vector<int>> powers;
-    vector<vector<int>> inversePowers;
+long long powerModulo(long long base,long long power,long long mod){
+    long long ans = 1;
+    while(power){
 
-    int powerModulo(int base,int power,int mod){
-        int res=1;
-        while(power){
-            if(power&1) res=(res*base)%mod;
-            base=(base*base)%mod;
-            power>>=1;
+        if(power&1) {
+            ans = (ans*base)%mod;
         }
 
-        return res;
+        base = (base*base) %mod;
+        power>>=1;
+
     }
 
-    void compute(){
-        for(int i=0;i<numberOfHashes;i++) powers[i][0] =1;
-        for(int i=0;i<numberOfHashes;i++) for(int j=1;j<MAXN;j++) powers[i][j] = (powers[i][j-1]*BASE[i])%MOD[i];
-        for(int i=0;i<numberOfHashes;i++) for(int j=1;j<MAXN;j++) inversePowers[i][j] = powerModulo(powers[i][j],MOD[i]-2,MOD[i]);
+    return ans;
+}
+
+class Hash {
+
+    //seed = {31,101} and mod = {1e9+7,1e9+7} 
+    array<long long,2> seed = {31,101};
+    array<long long,2> MOD = {(long long)1e9+7,(long long)1e9+7};
+    vector<vector<long long>> powerMod , inversePowerMod;
+
+    public:
+
+    Hash(long long n){
+         
+        powerMod.resize(n,vector<long long>(2));  inversePowerMod.resize(n,vector<long long>(2));
+
+        array<long long,2> aInvMod;
+
+        for(long long j=0;j<2;j++)
+            aInvMod[j] = powerModulo(seed[j],MOD[j]-2,MOD[j]);
+        
+        for(long long j=0;j<2;j++) 
+            powerMod[0][j] = inversePowerMod[0][j] = 1;
+
+        for(long long i=1;i<n;i++){
+
+            for(long long j=0;j<2;j++){
+
+                powerMod[i][j] = (powerMod[i-1][j]*seed[j])%MOD[j];
+                inversePowerMod[i][j] = (inversePowerMod[i-1][j]*aInvMod[j])%MOD[j];
+
+            }
+
+        }
+
     }
 
-    void createPrefixHash(){
-        for(int i=0;i<numberOfHashes;i++){
-            for(int j=0;j<sz;j++){
-                v[i][j] = ((j>0?v[i][j-1] : 0) + (s[j]-'a'+1) * powers[i][j])%MOD[i];
+    vector<int> hashof(string &s){
+        long long n;
+        n = s.size();
+
+        vector<int> pref(2);
+
+        pref[0] = pref[1] = s[0] - 'a' + 1;
+
+        for(long long i=1 ; i<n ; i++){
+            for(long long j=0;j<2;j++){
+                pref[j] = (pref[j] + (s[i] - 'a' + 1)*powerMod[i][j])%MOD[j];
             }
         }
+
+        return pref;
     }
 
-    public : 
-    Hash(vector<int> b,vector<int> m){
-        assert(b.size()==m.size());
-        this->numberOfHashes = b.size();
-        this->BASE = b;
-        this->MOD = m;
-        powers.resize(numberOfHashes,vector<int>(MAXN));
-        inversePowers.resize(numberOfHashes,vector<int>(MAXN));
-        compute();
-    }
+    vector<vector<long long>> prefixHash(string &s){
+        long long n;
+        n = s.size();
 
+        vector<vector<long long>> pref(n,vector<long long>(2));
 
-    Hash(string s,vector<int> b,vector<int> m){
-        assert(b.size()==m.size());
-        this->s = s;
-        this->sz = s.size();
-        this->numberOfHashes = b.size();
-        this->BASE = b;
-        this->MOD = m;
-        v.resize(numberOfHashes,vector<int>(sz));
-        powers.resize(numberOfHashes,vector<int>(MAXN));
-        inversePowers.resize(numberOfHashes,vector<int>(MAXN));
-        compute();
-        createPrefixHash();
-    }
+        pref[0][0] = pref[0][1] = s[0] - 'a' + 1;
 
-
-    void createSuffixHash(){
-        reverse_v.resize(numberOfHashes,vector<int>(sz));
-        for(int i=0;i<numberOfHashes;i++){
-            for(int j=sz-1;j>=0;j--){
-                reverse_v[i][j] = ((j<sz-1?reverse_v[i][j+1] : 0) + (s[j]-'a'+1) * powers[i][sz-1-j])%MOD[i];
+        for(long long i=1 ; i<n ; i++){
+            for(long long j=0;j<2;j++){
+                pref[i][j] = (pref[i-1][j] + (s[i] - 'a' + 1)*powerMod[i][j])%MOD[j];
             }
         }
+
+        return pref;
     }
 
 
-    vector<int> get_hash(int l,int r){
-        vector<int> ans;
-        if(l==0){
-            for(int i=0;i<numberOfHashes;i++) ans.push_back(v[i][r]);
-        }
-        else{
-            for(int i=0;i<numberOfHashes;i++) ans.push_back(((v[i][r]-v[i][l-1] + MOD[i])*inversePowers[i][l])%MOD[i]);
-        }
-        return ans;
-    }
-
-    vector<int> get_reverse_hash(int l,int r){
-        vector<int> ans;
-        if(r==sz-1){
-            for(int i=0;i<numberOfHashes;i++) ans.push_back(reverse_v[i][l]);
-        }
-        else{
-            for(int i=0;i<numberOfHashes;i++) ans.push_back(((reverse_v[i][l]-reverse_v[i][r+1] + MOD[i])*inversePowers[i][sz-1-r])%MOD[i]);
-        }
-        return ans;
-    }
-
-    vector<int> hash_Of(string &s){
-        vector<int> ans;
-        for(int i=0;i<numberOfHashes;i++){
-            int curr = 0;
-            for(int j=0;j<sz;j++){
-                curr = (curr + (s[j]-'a'+1) * powers[i][j])%MOD[i];
+    inline vector<long long> getHash(long long l,long long r,vector<vector<long long>> &prefix){
+        if(l == 0) return prefix[r];
+        else {
+            vector<long long> h(2);
+            for(long long j=0;j<2;j++){
+                h[j] = (((prefix[r][j] - prefix[l-1][j])%MOD[j] + MOD[j])*inversePowerMod[l][j])%MOD[j];
             }
-            ans.push_back(curr);
+
+            return h;
         }
-        return ans;
     }
+
 };
