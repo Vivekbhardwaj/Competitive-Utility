@@ -2,22 +2,17 @@
 using namespace std;
 
 void kmparray(string s){
-    vector<int> border((int)s.size());
+    int n = s.size();
+    vector<int> border(n);
 
-    int curr_border=0;
-    for(int i=1;i<(int)s.size();i++){
-        if(s[i]==s[curr_border]){
-            curr_border++;
-            border[i]=curr_border;
+    for(int i=1;i<n;i++){
+        border[i] = border[i-1];
+        while(border[i] > 0 && s[border[i]] != s[i]){
+            border[i] = border[border[i]-1];        //remember border[i] = border[border[i]] won't work because there might be two consecutive same no. and it'd be stuck in an infinite loop
         }
-        else if(curr_border==0){
-            border[i]=0;
-        }
-        else{
-            i--;
-            curr_border=s[curr_border-1];
-        }
+        border[i]+=(s[i] == s[border[i]]);
     }
+
 
     for(auto i : border) cout<<i<<" ";cout<<"\n";
 }
