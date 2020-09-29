@@ -1,3 +1,4 @@
+//minimum in range along with the index of minimum
 #include<bits/stdc++.h>
 using namespace std;
 #define int long long
