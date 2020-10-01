@@ -1,82 +1,65 @@
-//The concept of suffix array is based on sorting cyclic shifts
+// Written By Dheeraj Maurya
+// Btech Student IET LUCKNOW(2018 - 2022)
+// Suffix array
+// Applications : lcp of two substrings ,number of different substrings , finding a substring...
 
-//Suffix array is the data structure which stores suffixes in sorted order
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
 
+struct suf{
+  ll id, rank[2];
+};
 
-vector<int> createSuffixArray(const string &s){
-    int n=s.size();
-    map<char,int> mp;
-    for(auto i : s)mp[i]++;
-
-    int counter=0;
-    for(auto &i : mp){
-        i.second=counter++;
-    }
-
-    //at every instant it keeps the ordering of the suffixes of starting at index i
-    //we do the ordering in multiples of 2 first we find what will be the position if we compare first characters,then we compare first two characters,then first four and so on
-    //fortunately we can compare first 2^k characters fo two suffixes if we know comparasion 2^k-1 by the method below of making tuples of current order of sum=ffix and order the 2^(k-1) th next suffix
-    //and we give them new ordering accordingly 
-    vector<int> suffixArray(n);
-    for(int i=0;i<n;i++) suffixArray[i]=mp[s[i]];       //giving order to suffix starting at i-th index based on its first character suffixes having same first character are given same value
-
-    // for(auto i : suffixArray) cerr<<i<<" ";cerr<<"\n";
-
-    for(int k=2,i=1;k<=ceil(1.0*log2(n))+1;i*=2,k++){               //you have to move in blocks of power of 2
-        vector<pair<int,int>> tuple_to_be_sorted(n);
-        for(int j=0;j<n;j++){
-            tuple_to_be_sorted[j].first=suffixArray[j];
-            tuple_to_be_sorted[j].second=(j+i<n?suffixArray[j+i]:-1);
-        }
-
-        //map here is used to find the order of the pair
-        map<pair<int,int>,int> m;
-        for(auto i : tuple_to_be_sorted) m[i]++;
-        counter=0;
-        for(auto &j : m){
-            j.second=counter++;
-            // cerr<<"("<<j.first.first<<","<<j.first.second<<") ";
-        }
-        // cerr<<"\n";
-         
-
-        for(int j=0;j<n;j++){
-            suffixArray[j]=m[tuple_to_be_sorted[j]];        //giving order to suffix starting at i-th index based on first 2^k characters suffixes having same first 2^k characters are given same value
-        }
-
-        // for(auto i : suffixArray) cerr<<i<<" ";cerr<<"\n";
-
-
-    }
-    
-    //this is not the suffix array same as what the definition says though it is similar and we can get the suffix array of our definition by single pass
-    //this suffix array gives the information that if we sort the suffixes what will be the index of suffix starting at i in our string
-    // return suffixArray;
-
-
-
-    vector<pair<int,int>> x(n);
-    for(int i=0;i<n;i++){
-        x[i].first=suffixArray[i];
-        x[i].second=i;
-    }
-    sort(x.begin(),x.end());
-
-    vector<int> sortedSuffixArray(n);
-    for(int i=0;i<n;i++)sortedSuffixArray[i]=x[i].second;
-
-
-    //suffix array which gives the index of starting of suffix in a sorted manner
-    return sortedSuffixArray;
-
-
+bool comp(struct suf & a ,struct suf &b){
+  if(a.rank[0]==b.rank[0]) return (a.rank[1] < b.rank[1]);
+  return (a.rank[0] < b.rank[0]);
 }
 
-int main(){
-    vector<int> x = createSuffixArray("aagsmrvafyqwxq");
-    for(auto i : x) cerr<<i<<" ";cerr<<"\n";
+vector<ll> build(string s){
+  ll n=s.size() ; ++n; struct suf arr[n]; ll id[n];
 
-    return 0;
+  for(ll i=0;i<n;i++){
+     arr[i].id =i;
+     arr[i].rank[0]=s[i]-'a';
+     arr[i].rank[1]=( (i+1)<n )? (s[i+1]-'a'): -1; 
+  }
+   
+  sort(arr ,arr+ n ,comp);  // first we sort all suffixes according to first two characters
+
+  for(ll k=4;k<2*n;k*=2){
+    // now we sort all suffiexes according to next k/2 characters
+    ll prev_rank = arr[0].rank[0] ,rank=0;
+    id[arr[0].id] = 0 ; 
+    arr[0].rank[0] = 0;
+    
+    
+    for(ll i=1;i<n;i++){
+      if(arr[i].rank[0] == prev_rank && arr[i].rank[1] == arr[i-1].rank[1] ) arr[i].rank[0] = rank; 
+      else  { prev_rank = arr[i].rank[0] ;  arr[i].rank[0] = ++rank; }
+      id[arr[i].id] =i;
+    }
+
+    for(ll i=0;i<n;i++){
+      ll next = arr[i].id + k/2;
+      arr[i].rank[1] = ((next<n))? (arr[id[next]].rank[0]):-1;
+    }
+    sort(arr ,arr+n, comp); // sort suffixes according to first sorted k/2 characters and next k/2 characters 
+
+  }
+   vector<ll> v(n);
+   for(ll i=0;i<n;i++)
+    v[i] = arr[i].id;
+   return v; 
+}
+
+int main() {
+  ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+  
+  string s= "aagsmrvafyqwxq"; 
+
+  vector<ll> suffix_array = build(s); // calling build function for suffix array
+  
+  for(auto k:suffix_array)
+    cout<<k<<" ";  
 }
